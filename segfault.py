@@ -10,9 +10,17 @@ from vast.voidfinder.multizmask import generate_mask
 from vast.voidfinder.preprocessing import file_preprocess
 
 class TestVoidFinder:
-
+    @classmethod
+    def setUpClass(cls):
+        # Set up some global variables available to all test cases.
+        TestVoidFinder.wall = None
+        TestVoidFinder.dist_limits = None
+        TestVoidFinder.mask = None
+        TestVoidFinder.grid_shape = None
 
     def setUp(self):
+
+        
         # Set up a dummy survey that can be used to test I/O, preprocessing,
         # and void finding.
         self.ra_range = np.arange(10, 30, 0.5)
@@ -50,13 +58,20 @@ class TestVoidFinder:
         """
         f_galaxy_table, f_dist_limits, f_out1_filename, f_out2_filename = \
             file_preprocess(self.galaxies_filename, '', '', dist_metric='redshift')
+        
+        TestVoidFinder.dist_limits = np.zeros(2)
+        TestVoidFinder.dist_limits[1] = c*self.redshift_range[-1]/100.
 
         """Take a table of galaxy coordinates and maximum redshift and return a boolean mask + resolution
         """
         f_mask, f_mask_resolution = generate_mask(self.galaxies_shuffled, 
                                                   self.redshift_range[-1], 
                                                   dist_metric='redshift')
-
+        
+        TestVoidFinder.mask = np.zeros((360,180), dtype=bool)
+        for i in range(int(self.ra_range[0]), int(self.ra_range[-1]+1)):
+            for j in range(int(self.dec_range[0] + 90), int(self.dec_range[-1] + 90)+1):
+                TestVoidFinder.mask[i, j] = True
 
         """Filter galaxies.
         
@@ -77,7 +92,13 @@ class TestVoidFinder:
                                           '', 
                                           dist_metric='redshift', 
                                           )
-
+        
+        gal_tree = neighbors.KDTree(self.gal)
+        distances, indices = gal_tree.query(self.gal, k=4)
+        dist3 = distances[:,3]
+        TestVoidFinder.wall = self.gal[dist3 < (np.mean(dist3) + 1.5*np.std(dist3))]
+        
+        field = self.gal[dist3 >= (np.mean(dist3) + 1.5*np.std(dist3))]
 
         """Identify maximal spheres and holes in the galaxy distribution
         """
@@ -130,6 +151,6 @@ class TestVoidFinder:
         for f in files:
             if os.path.exists(f):
                 os.remove(f)
-
+TestVoidFinder.setUpClass()
 obj = TestVoidFinder()
 obj.setUp()
