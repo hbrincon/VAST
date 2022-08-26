@@ -1106,16 +1106,16 @@ cdef class HoleGridCustomDict:
         hole_lookup_buffer_length = self.mem_length*7 #7 bytes per element
         
         os.ftruncate(self.lookup_fd, hole_lookup_buffer_length)
-        printf("1 ")
+        printf("debugging: attempting to run self.hole_lookup_buffer.close()")
         ################################################################################
         # Close the old mmap and re-map it since we changed the size of our memory file
         # pointed to by self.lookup_fd.  Then point our self.lookup_memory memoryview
         # object to the extended version of where it was already pointing
         ################################################################################
         self.hole_lookup_buffer.close()
-        printf("2 ")
+        printf("debugging: self.hole_lookup_buffer.close() finished sucsessfully")
         self.hole_lookup_buffer = mmap.mmap(self.lookup_fd, hole_lookup_buffer_length)
-        printf("3 ")
+        
         self.lookup_memory = np.frombuffer(self.hole_lookup_buffer, dtype=self.numpy_dtype)
         
         ################################################################################
