@@ -1085,11 +1085,11 @@ cdef class HoleGridCustomDict:
         # re-distributed into new locations.  There might be a way to do this in-place
         # but that's an optimization for future-Steve to look into
         ################################################################################
-        printf("begin \n")
+        printf("begin ")
         old_elements = np.frombuffer(self.hole_lookup_buffer, dtype=self.numpy_dtype)
-        printf("1 ")
+   
         old_elements = old_elements.copy()
-        printf("2 ")
+
         old_lookup_mem = old_elements
         
         old_mem_length = self.mem_length
@@ -1100,24 +1100,24 @@ cdef class HoleGridCustomDict:
         # requested value given by new_mem_length
         ################################################################################
         next_prime = find_next_prime(new_mem_length)
-        printf("3 ")
+        
         self.mem_length = next_prime
         
         hole_lookup_buffer_length = self.mem_length*7 #7 bytes per element
         
         os.ftruncate(self.lookup_fd, hole_lookup_buffer_length)
-        printf("4 ")
+        printf("1 ")
         ################################################################################
         # Close the old mmap and re-map it since we changed the size of our memory file
         # pointed to by self.lookup_fd.  Then point our self.lookup_memory memoryview
         # object to the extended version of where it was already pointing
         ################################################################################
         self.hole_lookup_buffer.close()
-        
+        printf("2 ")
         self.hole_lookup_buffer = mmap.mmap(self.lookup_fd, hole_lookup_buffer_length)
-        printf("5 ")
+        printf("3 ")
         self.lookup_memory = np.frombuffer(self.hole_lookup_buffer, dtype=self.numpy_dtype)
-        printf("6 ")
+        
         ################################################################################
         # Zero out the hash table before re-filling it
         ################################################################################
