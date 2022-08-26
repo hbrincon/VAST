@@ -37,7 +37,7 @@ import tempfile
 from multiprocessing import RLock, Value
 from ctypes import c_int64
 import mmap
-
+from libc.stdio cimport printf
 
 
 
@@ -1062,9 +1062,9 @@ cdef class HoleGridCustomDict:
             first_try = False
     
         if self.num_elements >= (<DTYPE_INT64_t>(0.60*self.mem_length)):
-            
+            printf("began")
             self.resize(2*self.mem_length)
-            
+            printf("ended")
         return
             
             
