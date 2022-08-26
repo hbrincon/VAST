@@ -1000,7 +1000,6 @@ cdef class HoleGridCustomDict:
                        CELL_ID_t j,
                        CELL_ID_t k, 
                        ):
-        printf("oh no")
         """
         we initialize the length of
         self.lookup_memory to be longer than the number of items
@@ -1063,9 +1062,9 @@ cdef class HoleGridCustomDict:
             first_try = False
     
         if self.num_elements >= (<DTYPE_INT64_t>(0.60*self.mem_length)):
-            printf("began")
+            
             self.resize(2*self.mem_length)
-            printf("ended")
+            
         return
             
             
@@ -1086,10 +1085,11 @@ cdef class HoleGridCustomDict:
         # re-distributed into new locations.  There might be a way to do this in-place
         # but that's an optimization for future-Steve to look into
         ################################################################################
+        printf("begin \n")
         old_elements = np.frombuffer(self.hole_lookup_buffer, dtype=self.numpy_dtype)
-        
+        printf("1 ")
         old_elements = old_elements.copy()
-        
+        printf("2 ")
         old_lookup_mem = old_elements
         
         old_mem_length = self.mem_length
@@ -1100,13 +1100,13 @@ cdef class HoleGridCustomDict:
         # requested value given by new_mem_length
         ################################################################################
         next_prime = find_next_prime(new_mem_length)
-    
+        printf("3 ")
         self.mem_length = next_prime
         
         hole_lookup_buffer_length = self.mem_length*7 #7 bytes per element
         
         os.ftruncate(self.lookup_fd, hole_lookup_buffer_length)
-        
+        printf("4 ")
         ################################################################################
         # Close the old mmap and re-map it since we changed the size of our memory file
         # pointed to by self.lookup_fd.  Then point our self.lookup_memory memoryview
@@ -1115,9 +1115,9 @@ cdef class HoleGridCustomDict:
         self.hole_lookup_buffer.close()
         
         self.hole_lookup_buffer = mmap.mmap(self.lookup_fd, hole_lookup_buffer_length)
-        
+        printf("5 ")
         self.lookup_memory = np.frombuffer(self.hole_lookup_buffer, dtype=self.numpy_dtype)
-        
+        printf("6 ")
         ################################################################################
         # Zero out the hash table before re-filling it
         ################################################################################
