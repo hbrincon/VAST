@@ -1000,6 +1000,7 @@ cdef class HoleGridCustomDict:
                        CELL_ID_t j,
                        CELL_ID_t k, 
                        ):
+        printf("oh no")
         """
         we initialize the length of
         self.lookup_memory to be longer than the number of items
